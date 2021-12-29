@@ -1,6 +1,13 @@
 from collections import defaultdict
 import logging
 import numpy as np
+import torch
+
+
+def convert_to_np(x):
+    if isinstance(x, torch.Tensor):
+        return x.detach().cpu().numpy()
+    return x
 
 class Logger:
     def __init__(self, console_logger):
@@ -45,7 +52,7 @@ class Logger:
                 continue
             i += 1
             window = 5 if k != "epsilon" else 1
-            item = "{:.4f}".format(np.mean([x[1] for x in self.stats[k][-window:]]))
+            item = "{:.4f}".format(np.mean([convert_to_np(x[1]) for x in self.stats[k][-window:]]))
             log_str += "{:<25}{:>8}".format(k + ":", item)
             log_str += "\n" if i % 4 == 0 else "\t"
         self.console_logger.info(log_str)
